@@ -12,11 +12,13 @@
       <ContactTable :contacts="state.contacts" :customer="props.customer" />
     </TableLayout>
   </div>
+  <ContactCreateModel v-model:openModal="state.openModal" :customer="props.customer" />
 </template>
 
 <script setup lang="ts">
 import { onMounted, shallowReactive, provide } from 'vue'
 import axios from 'axios'
+import ContactCreateModel from './ContactCreateModel.vue'
 import TableLayout from './TableLayout.vue'
 import TheButton from './TheButton.vue'
 import ContactTable from './ContactTable.vue'
