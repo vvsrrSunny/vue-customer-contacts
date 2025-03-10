@@ -36,13 +36,27 @@
     </tbody>
   </table>
   <div v-if="customers.length === 0" class="p-5 sm:p-10 text-center">No customers to show!</div>
+  <CustomerUpdateModel v-model:openModal="state.openModal" :customer="state.selectedCustomer" />
+  <ModelLayout
+    heading="Delete Customer"
+    v-model="openModelToDeleteCustomer"
+    @modelClose="openModelToDeleteCustomer = false"
+    @modelSubmit="submitForm"
+    submitLabel="Delete"
+  >
+    <p class="py-4">
+      Would you like to delete the Customer named {{ state.selectedCustomer.name }}
+    </p>
+  </ModelLayout>
 </template>
 
 <script setup lang="ts">
-import { shallowReactive, ref } from 'vue'
+import { shallowReactive, ref, inject } from 'vue'
 import TableCell from './TableCell.vue'
 import TableHeaderLayout from './TableHeaderLayout.vue'
+import CustomerUpdateModel from './CustomerUpdateModel.vue'
 import { Customer } from '../types'
+import ModelLayout from './ModelLayout.vue'
 import axios from 'axios'
 
 defineProps<{ customers: Customer[] }>()
@@ -59,6 +73,12 @@ const state = shallowReactive({
   } as Customer,
 })
 
+const refreshCustomers = inject('refreshCustomers') as () => void
+const showNotification = inject('showNotification') as (data: {
+  message: string
+  isSuccess: boolean
+  title: string
+}) => void
 
 const openModelToDeleteCustomer = ref(false)
 const customerSelected = (customer: Customer) => {
@@ -69,5 +89,24 @@ const customerSelected = (customer: Customer) => {
 const customerSelectedToDelete = (customer: Customer) => {
   state.selectedCustomer = { ...customer }
   openModelToDeleteCustomer.value = true
+}
+
+const submitForm = async () => {
+  try {
+    await axios.delete(`http://localhost:8000/api/customers/${state.selectedCustomer.id}`)
+    refreshCustomers()
+    showNotification({
+      title: 'Deleted',
+      message: 'Customer deleted successfully!',
+      isSuccess: true,
+    })
+    openModelToDeleteCustomer.value = false
+  } catch {
+    showNotification({
+      title: 'Delete fail',
+      message: 'Failed to delete customer!',
+      isSuccess: false,
+    })
+  }
 }
 </script>
