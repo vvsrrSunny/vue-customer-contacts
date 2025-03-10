@@ -84,8 +84,8 @@ const submitForm = async () => {
     refreshContacts()
     refreshCustomers()
     showNotification({
-      title: 'Updated Contact',
-      message: 'Contact updated successfully!',
+      title: 'Created Contact',
+      message: 'Contact created successfully!',
       isSuccess: true,
     })
     handleClose()
@@ -93,8 +93,8 @@ const submitForm = async () => {
     console.error('Error:', error)
     errors.errorList = error.response.data.errors
     showNotification({
-      title: 'Update fail',
-      message: 'Failed to update contact!',
+      title: 'Create fail',
+      message: 'Failed to create contact!',
       isSuccess: false
     })
   }
