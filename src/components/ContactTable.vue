@@ -32,15 +32,34 @@
     </tbody>
   </table>
   <div v-if="contacts.length === 0" class="p-5 sm:p-10 text-center">No contacts to show!</div>
+  <ContactUpdateModel
+    v-model:openModal="state.openModal"
+    :contact="state.selectedContact"
+    :customer="customer"
+  />
+  <ModelLayout
+    v-model="openModelToDeleteContact"
+    @modelClose="openModelToDeleteContact = false"
+    @modelSubmit="submitForm"
+    submitLabel="Delete"
+    heading="Delete Contact"
+  >
+    <p class="py-4">
+      Would you like to delete the Contact named {{ state.selectedContact.first_name }}
+    </p>
+  </ModelLayout>
 </template>
 
 <script setup lang="ts">
 import TableCell from './TableCell.vue'
 import TableHeaderLayout from './TableHeaderLayout.vue'
+import ContactUpdateModel from './ContactUpdateModel.vue'
 import { Contact, Contacts, Customer } from '../types'
-import { shallowReactive, ref } from 'vue'
+import { shallowReactive, ref, inject } from 'vue'
+import ModelLayout from './ModelLayout.vue'
+import axios from 'axios'
 
-defineProps<{ contacts: Contacts; customer: Customer }>()
+const props = defineProps<{ contacts: Contacts; customer: Customer }>()
 
 const state = shallowReactive({
   openModal: false,
@@ -50,6 +69,14 @@ const state = shallowReactive({
     last_name: '',
   } as Contact,
 })
+
+const refreshCustomers = inject('refreshCustomers') as () => void
+const refreshContacts = inject('refreshContacts') as () => void
+const showNotification = inject('showNotification') as (data: {
+  message: string
+  isSuccess: boolean
+  title: string
+}) => void
 
 const openModelToDeleteContact = ref(false)
 
@@ -63,4 +90,25 @@ const contactSelectedToDelete = (contact: Contact) => {
   openModelToDeleteContact.value = true
 }
 
+const submitForm = async () => {
+  try {
+    await axios.delete(
+      `http://localhost:8000/api/customers/${props.customer.id}/contacts/${state.selectedContact.id}`,
+    )
+    refreshContacts()
+    refreshCustomers()
+    openModelToDeleteContact.value = false
+    showNotification({
+      title: 'Deleted',
+      message: 'Contact deleted successfully!',
+      isSuccess: true,
+    })
+  } catch {
+    showNotification({
+      title: 'Delete fail',
+      message: 'Failed to delete contact!',
+      isSuccess: false,
+    })
+  }
+}
 </script>
