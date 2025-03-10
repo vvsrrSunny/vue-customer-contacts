@@ -19,6 +19,7 @@
       <CustomerTable :customers="state.people" />
     </TableLayout>
   </div>
+  <CustomerCreateModel v-model:openModal="state.openModal" />
 </template>
 
 <script setup lang="ts">
@@ -26,6 +27,7 @@ import { onMounted, shallowReactive, watch, provide } from 'vue'
 import axios from 'axios'
 import TheFilters from './TheFilters.vue'
 import CustomerTable from './CustomerTable.vue'
+import CustomerCreateModel from './CustomerCreateModel.vue'
 import TableLayout from './TableLayout.vue'
 import { makeEndPoint } from '../utils/api'
 import TheButton from './TheButton.vue'
